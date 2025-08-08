@@ -1,134 +1,134 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Simple Port Scanner</title>
-  <style>
+<!DOCTYPE html> <!-- telling the browser this is an html5 doc -->
+<html lang="en"> <!-- setting language to english -->
+<head> <!-- head section for meta stuff and styles -->
+  <meta charset="UTF-8" /> <!-- making sure characters display properly -->
+  <title>Simple Port Scanner</title> <!-- page title -->
+  <style> /* styling the page so it doesn’t look boring */
     body {
-      font-family: Arial, sans-serif;
-      max-width: 420px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #fafafa;
-      color: #222;
-      text-align: center;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      font-family: Arial, sans-serif; /* picking a clean font */
+      max-width: 420px; /* keeping it nicely centered and not too wide */
+      margin: 40px auto; /* centering the container vertically with some space */
+      padding: 20px; /* adding space inside the container */
+      background: #fafafa; /* soft background color */
+      color: #222; /* dark gray text */
+      text-align: center; /* center align text */
+      border: 1px solid #ddd; /* light border */
+      border-radius: 8px; /* rounded corners */
     }
     h2 {
-      margin-bottom: 20px;
+      margin-bottom: 20px; /* space under the heading */
     }
     input[type="text"] {
-      padding: 10px;
-      width: 80%;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      margin-bottom: 10px;
+      padding: 10px; /* inner padding for input */
+      width: 80%; /* making input wide but not full */
+      font-size: 1rem; /* decent text size */
+      border: 1px solid #ccc; /* light border */
+      border-radius: 4px; /* slight curve on edges */
+      margin-bottom: 10px; /* space below */
     }
     button {
-      padding: 10px 16px;
-      font-size: 1rem;
-      background-color: #ff5252;
-      border: none;
-      border-radius: 4px;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+      padding: 10px 16px; /* comfy clickable area */
+      font-size: 1rem; /* readable size */
+      background-color: #ff5252; /* red vibe */
+      border: none; /* no ugly default border */
+      border-radius: 4px; /* soft edges */
+      color: white; /* white text */
+      cursor: pointer; /* pointer on hover */
+      transition: background-color 0.3s ease; /* smooth hover effect */
     }
     button:disabled {
-      background-color: #ff9a9a;
-      cursor: not-allowed;
+      background-color: #ff9a9a; /* lighter red when disabled */
+      cursor: not-allowed; /* show you can’t click */
     }
     button:hover:not(:disabled) {
-      background-color: #e04545;
+      background-color: #e04545; /* darker red when hovering */
     }
     pre {
-      background: #f0f0f0;
-      padding: 15px;
-      text-align: left;
-      min-height: 120px;
-      overflow-y: auto;
-      border-radius: 6px;
-      margin-top: 20px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
+      background: #f0f0f0; /* light gray bg */
+      padding: 15px; /* some padding inside */
+      text-align: left; /* align results to left */
+      min-height: 120px; /* always a bit tall */
+      overflow-y: auto; /* scroll if it overflows */
+      border-radius: 6px; /* rounded edges */
+      margin-top: 20px; /* space above */
+      white-space: pre-wrap; /* wrap lines if too long */
+      word-wrap: break-word; /* break long words */
     }
     .error {
-      color: #b00020;
-      margin-top: 10px;
-      font-weight: bold;
+      color: #b00020; /* error red */
+      margin-top: 10px; /* space above error text */
+      font-weight: bold; /* bold error text */
     }
   </style>
 </head>
-<body>
-  <h2>Port Scanner</h2>
-  <input type="text" id="ipInput" placeholder="Enter IP address (e.g., 127.0.0.1)" />
-  <br />
-  <button id="scanBtn" onclick="startScan()">Scan Ports</button>
-  <div class="error" id="errorMsg"></div>
+<body> <!-- stuff user will see -->
+  <h2>Port Scanner</h2> <!-- main heading -->
+  <input type="text" id="ipInput" placeholder="Enter IP address (e.g., 127.0.0.1)" /> <!-- input box for ip -->
+  <br /> <!-- line break for spacing -->
+  <button id="scanBtn" onclick="startScan()">Scan Ports</button> <!-- button to start scan -->
+  <div class="error" id="errorMsg"></div> <!-- area for error messages -->
 
-  <h3>Results:</h3>
-  <pre id="results"></pre>
+  <h3>Results:</h3> <!-- results heading -->
+  <pre id="results"></pre> <!-- area to show results nicely -->
 
   <script>
-    // simple IPv4 validation regex - basic check, no IPv6 for now
+    // quick ip validator just for ipv4 - not dealing with ipv6 rn
     function isValidIP(ip) {
-      const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-      if (!ipRegex.test(ip)) return false;
-      return ip.split('.').every(octet => {
-        const num = Number(octet);
-        return num >= 0 && num <= 255;
+      const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/; // basic regex to match 4 numbers separated by dots
+      if (!ipRegex.test(ip)) return false; // if pattern doesn’t match, not valid
+      return ip.split('.').every(octet => { // check each number
+        const num = Number(octet); // convert to number
+        return num >= 0 && num <= 255; // must be between 0 and 255
       });
     }
 
-    async function startScan() {
-      const ipInput = document.getElementById('ipInput');
-      const ip = ipInput.value.trim();
-      const resultsEl = document.getElementById('results');
-      const errorEl = document.getElementById('errorMsg');
-      const scanBtn = document.getElementById('scanBtn');
+    async function startScan() { // main function to handle scanning
+      const ipInput = document.getElementById('ipInput'); // grab input element
+      const ip = ipInput.value.trim(); // get and clean user input
+      const resultsEl = document.getElementById('results'); // get results box
+      const errorEl = document.getElementById('errorMsg'); // get error display
+      const scanBtn = document.getElementById('scanBtn'); // get scan button
 
-      errorEl.textContent = '';
-      resultsEl.textContent = '';
+      errorEl.textContent = ''; // clear error text
+      resultsEl.textContent = ''; // clear old results
 
-      if (!isValidIP(ip)) {
-        errorEl.textContent = '⚠️ Please enter a valid IPv4 address.';
-        return;
+      if (!isValidIP(ip)) { // check if ip is valid
+        errorEl.textContent = '⚠️ Please enter a valid IPv4 address.'; // show error
+        return; // stop function
       }
 
-      scanBtn.disabled = true;
-      scanBtn.textContent = 'Scanning...';
+      scanBtn.disabled = true; // disable button during scan
+      scanBtn.textContent = 'Scanning...'; // change button text
 
-      resultsEl.textContent = 'Scanning ports 21, 22, 23, 25, 53, 80, 110, 139, 143, 443, 445, 3389...\n\n';
+      resultsEl.textContent = 'Scanning ports 21, 22, 23, 25, 53, 80, 110, 139, 143, 443, 445, 3389...\n\n'; // initial message
 
       try {
-        const response = await fetch('/scan', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ ip })
+        const response = await fetch('/scan', { // send request to backend
+          method: 'POST', // using post
+          headers: {'Content-Type': 'application/json'}, // tell server we send json
+          body: JSON.stringify({ ip }) // send ip as json
         });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          errorEl.textContent = errorData.detail || 'Error scanning ports.';
-          scanBtn.disabled = false;
-          scanBtn.textContent = 'Scan Ports';
-          return;
+        if (!response.ok) { // if server didn’t return success
+          const errorData = await response.json(); // get error details
+          errorEl.textContent = errorData.detail || 'Error scanning ports.'; // show error
+          scanBtn.disabled = false; // re-enable button
+          scanBtn.textContent = 'Scan Ports'; // reset button text
+          return; // stop
         }
 
-        const data = await response.json();
+        const data = await response.json(); // get scan results from server
 
-        let output = '';
-        for (const port in data) {
-          output += `Port ${port}: ${data[port]}\n`;
+        let output = ''; // variable to build output text
+        for (const port in data) { // go through each port result
+          output += `Port ${port}: ${data[port]}\n`; // append to output string
         }
-        resultsEl.textContent += output;
-      } catch (err) {
-        errorEl.textContent = 'Error: ' + err.message;
-      } finally {
-        scanBtn.disabled = false;
-        scanBtn.textContent = 'Scan Ports';
+        resultsEl.textContent += output; // add to results box
+      } catch (err) { // if something went wrong
+        errorEl.textContent = 'Error: ' + err.message; // show error message
+      } finally { // always run this part
+        scanBtn.disabled = false; // re-enable button
+        scanBtn.textContent = 'Scan Ports'; // reset button text
       }
     }
   </script>
